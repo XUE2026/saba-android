@@ -2,7 +2,6 @@
 #define SABA_MODEL_MMD_MMDPHYSICS_H_
 
 #include "MMDNode.h"
-#include "MMDModel.h"
 #include "PMDFile.h"
 #include "PMXFile.h"
 
@@ -14,11 +13,33 @@
 
 namespace saba {
 
+class MMDModel;
+
+class MMDRigidBody {
+public:
+    MMDRigidBody() = default;
+    ~MMDRigidBody() = default;
+
+    void SetActivation(bool) {}
+    void ResetTransform() {}
+    void Reset(class MMDPhysics*) {}
+    void ReflectGlobalTransform() {}
+    void CalcLocalTransform() {}
+    glm::mat4 GetTransform() { return glm::mat4(1.0f); }
+};
+
+class MMDJoint {
+public:
+    MMDJoint() = default;
+    ~MMDJoint() = default;
+};
+
 class MMDPhysics {
 public:
     MMDPhysics() = default;
     ~MMDPhysics() = default;
 
+    bool Create() { return true; }
     bool Create(MMDModel* model, const PMXFile& pmx) { return true; }
     bool Create(MMDModel* model, const PMDFile& pmd) { return true; }
 
@@ -35,6 +56,12 @@ public:
 
     void LinkPhysics() {}
     void UpdateBoneMatrix() {}
+
+    void AddRigidBody(MMDRigidBody*) {}
+    void RemoveRigidBody(MMDRigidBody*) {}
+    void AddJoint(MMDJoint*) {}
+    void RemoveJoint(MMDJoint*) {}
+    void Update(float) {}
 };
 
 } // namespace saba
