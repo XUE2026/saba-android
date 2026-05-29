@@ -1,0 +1,3 @@
+/workspace/gobot/build/CMakeFiles/gobot.dir
+/workspace/gobot/build/CMakeFiles/edit_cache.dir
+/workspace/gobot/build/CMakeFiles/rebuild_cache.dir

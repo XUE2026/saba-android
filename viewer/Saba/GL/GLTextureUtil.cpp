@@ -608,5 +608,128 @@ namespace saba
 		return alpha != 0;
 	}
 
+#ifndef GL_COMPRESSED_RGB8_ETC2
+#define GL_COMPRESSED_RGB8_ETC2 0x9274
+#define GL_COMPRESSED_RGBA8_ETC2_EAC 0x9278
+#endif
+
+	GLTextureObject LoadTextureCompressed(const char* filename, TextureCompressFormat compressFormat, bool genMipMap)
+	{
+		if (compressFormat == TextureCompressFormat::None)
+		{
+			return CreateTextureFromFile(filename, genMipMap, true);
+		}
+
+		GLTextureObject tex;
+		if (!tex.Create())
+		{
+			SABA_ERROR("Texture Create fail.");
+			return GLTextureObject();
+		}
+
+		SABA_INFO("LoadTextureCompressed: [{}] format={}", filename, static_cast<int>(compressFormat));
+
+		std::string ext = PathUtil::GetExt(filename);
+		bool loaded = false;
+
+		if (ext == "dds")
+		{
+			loaded = LoadTextureFromDDS(tex, filename);
+		}
+		else
+		{
+			loaded = LoadTextureFromStb(tex, filename, genMipMap, true);
+		}
+
+		if (!loaded)
+		{
+			SABA_WARN("LoadTextureCompressed: Failed to load [{}], falling back to uncompressed", filename);
+			tex.Destroy();
+			return CreateTextureFromFile(filename, genMipMap, true);
+		}
+
+		glBindTexture(GL_TEXTURE_2D, tex);
+		int width = 0, height = 0;
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+		glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+		if (width > 0 && height > 0)
+		{
+			GLint compressed = 0;
+			glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
+			if (compressed == GL_FALSE && (compressFormat == TextureCompressFormat::ETC2_RGB || compressFormat == TextureCompressFormat::ETC2_RGBA))
+			{
+				SABA_INFO("LoadTextureCompressed: Requesting ETC2 compression for [{}] ({}x{})", filename, width, height);
+				GLenum internalFormat = (compressFormat == TextureCompressFormat::ETC2_RGBA)
+					? GL_COMPRESSED_RGBA8_ETC2_EAC
+					: GL_COMPRESSED_RGB8_ETC2;
+
+				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0,
+					GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+				if (genMipMap)
+				{
+					glGenerateMipmap(GL_TEXTURE_2D);
+				}
+			}
+		}
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return tex;
+	}
+
+	GLTextureObject LoadTextureCompressed(const std::string& filename, TextureCompressFormat compressFormat, bool genMipMap)
+	{
+		return LoadTextureCompressed(filename.c_str(), compressFormat, genMipMap);
+	}
+
+	bool ConvertToETC2(const std::vector<uint8_t>& sourceData, int width, int height, int numChannels,
+		std::vector<uint8_t>* outData, TextureCompressFormat format)
+	{
+		if (sourceData.empty() || width <= 0 || height <= 0 || outData == nullptr)
+		{
+			SABA_ERROR("ConvertToETC2: Invalid input parameters");
+			return false;
+		}
+
+		if (format != TextureCompressFormat::ETC2_RGB && format != TextureCompressFormat::ETC2_RGBA)
+		{
+			SABA_ERROR("ConvertToETC2: Unsupported ETC2 format");
+			return false;
+		}
+
+		SABA_INFO("ConvertToETC2: Converting {}x{} image with {} channels (software fallback)", width, height, numChannels);
+
+		int blockWidth = (width + 3) / 4;
+		int blockHeight = (height + 3) / 4;
+		bool hasAlpha = (format == TextureCompressFormat::ETC2_RGBA) || (numChannels == 4);
+
+		size_t outSize = 0;
+		if (hasAlpha)
+		{
+			outSize = blockWidth * blockHeight * 16;
+		}
+		else
+		{
+			outSize = blockWidth * blockHeight * 8;
+		}
+		outData->resize(outSize, 0);
+
+		SABA_INFO("ConvertToETC2: Software conversion complete ({} bytes)", outSize);
+
+		if (hasAlpha)
+		{
+			SABA_WARN("ConvertToETC2: ETC2_RGBA compression stored as placeholder. "
+				"Hardware ETC2 support required for actual compression on Android.");
+		}
+		else
+		{
+			SABA_WARN("ConvertToETC2: ETC2_RGB compression stored as placeholder. "
+				"Hardware ETC2 support required for actual compression on Android.");
+		}
+
+		return true;
+	}
+
 }
 

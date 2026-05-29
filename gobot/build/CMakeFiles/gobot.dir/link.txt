@@ -1,0 +1,2 @@
+/usr/bin/ar qc libgobot.a CMakeFiles/gobot.dir/src/GobotFileIO.cpp.o CMakeFiles/gobot.dir/src/GobotConverter.cpp.o
+/usr/bin/ranlib libgobot.a

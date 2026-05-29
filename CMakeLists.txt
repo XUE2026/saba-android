@@ -71,6 +71,7 @@ if(MSVC)
 endif()
 
 add_subdirectory(external)
+add_subdirectory(gobot)
 
 add_subdirectory(src)
 add_subdirectory(viewer)

@@ -1,0 +1,14 @@
+This file marks the location of the MainScene.unity for the Saba MMD Viewer.
+
+When opened in Unity Editor, create the scene with:
+- Main Camera with CameraController component
+- Directional Light
+- Canvas with UIManager component
+- ModelLoader GameObject
+- FilterManager GameObject (attached to camera)
+- EnvironmentManager GameObject
+- BoneController GameObject
+- AnimationController GameObject
+- RecordingManager GameObject
+- GobotIntegration GameObject
+- LanguageManager GameObject (singleton, DontDestroyOnLoad)

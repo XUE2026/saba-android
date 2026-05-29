@@ -4,6 +4,8 @@ set (
     Saba/GL/GLShaderUtil.cpp
     Saba/GL/GLSLUtil.cpp
     Saba/GL/GLTextureUtil.cpp
+    Saba/GL/GLTextureCache.cpp
+    Saba/GL/GLFilter.cpp
 )
 set (
     GL_HEADER
@@ -11,7 +13,9 @@ set (
     Saba/GL/GLShaderUtil.h
     Saba/GL/GLSLUtil.h
     Saba/GL/GLTextureUtil.h
+    Saba/GL/GLTextureCache.h
     Saba/GL/GLVertexUtil.h
+    Saba/GL/GLFilter.h
 )
 
 # OBJ
@@ -45,12 +49,14 @@ set (
 # MMD
 set (
     GL_MODEL_MMD_SOURCE
+    Saba/GL/Model/MMD/GLMMDClothingManager.cpp
     Saba/GL/Model/MMD/GLMMDModel.cpp
     Saba/GL/Model/MMD/GLMMDModelDrawContext.cpp
     Saba/GL/Model/MMD/GLMMDModelDrawer.cpp
 )
 set (
     GL_MODEL_MMD_HEADER
+    Saba/GL/Model/MMD/GLMMDClothingManager.h
     Saba/GL/Model/MMD/GLMMDModel.h
     Saba/GL/Model/MMD/GLMMDModelDrawContext.h
     Saba/GL/Model/MMD/GLMMDModelDrawer.h
@@ -62,26 +68,48 @@ set (
     Saba/Viewer/Camera.cpp
     Saba/Viewer/Light.cpp
     Saba/Viewer/Grid.cpp
+    Saba/Viewer/LocalizationManager.cpp
     Saba/Viewer/ModelDrawer.cpp
+    Saba/Viewer/TexturePanel.cpp
     Saba/Viewer/Viewer.cpp
     Saba/Viewer/ViewerCommand.cpp
     Saba/Viewer/ViewerContext.cpp
     Saba/Viewer/CameraOverrider.cpp
     Saba/Viewer/VMDCameraOverrider.cpp
     Saba/Viewer/ShadowMap.cpp
+    Saba/Viewer/FilterPanel.cpp
+    Saba/Viewer/EnvironmentManager.cpp
+    Saba/Viewer/EnvironmentPanel.cpp
+    Saba/Viewer/BoneManipulator.cpp
+    Saba/Viewer/AnimationGenerator.cpp
+    Saba/Viewer/BonePanel.cpp
+    Saba/Viewer/GobotIntegration.cpp
+    Saba/Viewer/ModelPreloader.cpp
+    Saba/Viewer/OptimizationPanel.cpp
 )
 set (
     VIEWER_HEADER
     Saba/Viewer/Camera.h
     Saba/Viewer/Light.h
     Saba/Viewer/Grid.h
+    Saba/Viewer/LocalizationManager.h
     Saba/Viewer/ModelDrawer.h
+    Saba/Viewer/TexturePanel.h
     Saba/Viewer/Viewer.h
     Saba/Viewer/ViewerCommand.h
     Saba/Viewer/ViewerContext.h
     Saba/Viewer/CameraOverrider.h
     Saba/Viewer/VMDCameraOverrider.h
     Saba/Viewer/ShadowMap.h
+    Saba/Viewer/FilterPanel.h
+    Saba/Viewer/EnvironmentManager.h
+    Saba/Viewer/EnvironmentPanel.h
+    Saba/Viewer/BoneManipulator.h
+    Saba/Viewer/AnimationGenerator.h
+    Saba/Viewer/BonePanel.h
+    Saba/Viewer/GobotIntegration.h
+    Saba/Viewer/ModelPreloader.h
+    Saba/Viewer/OptimizationPanel.h
 )
 
 # gl3w
@@ -126,9 +154,10 @@ add_library(SabaViewer
 target_include_directories(SabaViewer
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../external/imgui/src
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../external/fcpp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../gobot/include
 )
 
-set (SabaViewer_LIBRARIES Saba fcpp ${OPENGL_LIBRARY} lua)
+set (SabaViewer_LIBRARIES Saba gobot fcpp ${OPENGL_LIBRARY} lua)
 
 # Link GLFW library
 if (SABA_FORCE_GLFW_BUILD)
