@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstdio>
 
 #define LOG_TAG "SabaModelLoader"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -31,23 +32,23 @@ public:
     bool LoadPMX(const std::string& path) {
         LOGI("Loading PMX: %s", path.c_str());
         PMXFile pmx;
-        if (!pmx.Load(path)) {
+        if (!ReadPMXFile(&pmx, path.c_str())) {
             LOGE("Failed to load PMX: %s", path.c_str());
             return false;
         }
-        LOGI("PMX loaded: %zu vertices, %zu faces", pmx.m_vertices.size(), pmx.m_indices.size() / 3);
+        LOGI("PMX loaded: %zu vertices, %zu faces", pmx.m_vertices.size(), pmx.m_faces.size());
         return true;
     }
 
     bool LoadVMD(const std::string& path) {
         LOGI("Loading VMD: %s", path.c_str());
         VMDFile vmd;
-        if (!vmd.Load(path)) {
+        if (!ReadVMDFile(&vmd, path.c_str())) {
             LOGE("Failed to load VMD: %s", path.c_str());
             return false;
         }
         LOGI("VMD loaded: %zu bone frames, %zu camera frames",
-             vmd.m_boneFrames.size(), vmd.m_cameraFrames.size());
+             vmd.m_motions.size(), vmd.m_cameras.size());
         return true;
     }
 };
