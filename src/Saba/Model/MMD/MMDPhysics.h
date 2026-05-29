@@ -26,12 +26,18 @@ public:
     void ReflectGlobalTransform() {}
     void CalcLocalTransform() {}
     glm::mat4 GetTransform() { return glm::mat4(1.0f); }
+
+    bool Create(const PMXRigidbody&, MMDModel*, MMDNode*) { return true; }
+    bool Create(const PMDRigidBodyExt&, MMDModel*, MMDNode*) { return true; }
 };
 
 class MMDJoint {
 public:
     MMDJoint() = default;
     ~MMDJoint() = default;
+
+    bool CreateJoint(const PMXJoint&, MMDRigidBody*, MMDRigidBody*) { return true; }
+    bool CreateJoint(const PMDJointExt&, MMDRigidBody*, MMDRigidBody*) { return true; }
 };
 
 class MMDPhysics {
