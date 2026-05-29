@@ -1,5 +1,44 @@
-build
-/mmd2obj.dir
-/mmd2obj.dir
-/x64
-/saba_viewer.dir
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# Build directories
+build/
+build-*/
+[Bb]uild*/
+out/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties
+android/gradle/wrapper/gradle-wrapper.jar
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Object files
+*.o
+*.obj
+*.lib
+*.a
+*.so
+
+# Python
+*.pyc
+__pycache__/
+
+# i/ folder (project internal docs)
+/i/

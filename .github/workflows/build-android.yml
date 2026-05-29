@@ -1,0 +1,168 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ "environment", "gobot", "master" ]
+  pull_request:
+    branches: [ "environment", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./android
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: 11076708
+
+      - name: Accept Android licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Install NDK
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "ndk;25.2.9519653" --sdk_root=$ANDROID_HOME
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            android/.gradle
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Cache CMake build
+        uses: actions/cache@v3
+        with:
+          path: |
+            android/app/.cxx
+          key: ${{ runner.os }}-cmake-${{ hashFiles('android/app/src/main/cpp/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-cmake-
+
+      - name: Build with Gradle
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK (if signing configured)
+        if: ${{ env.KEYSTORE_PASSWORD != '' }}
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "KEYSTORE_PASSWORD is set, building release..."
+          ./gradlew assembleRelease --stacktrace
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: saba-viewer-apk
+          path: |
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+          compression-level: 9
+
+      - name: Verify APK exists
+        run: |
+          echo "=== Build Output Files ==="
+          find android/app/build/outputs -name "*.apk" -type f 2>/dev/null || echo "No APK files found"
+          echo "=== Build Log ==="
+          cat android/app/build/outputs/logs/*.log 2>/dev/null || echo "No build logs"
+
+      - name: Generate build report
+        run: |
+          echo "## Build Report" > build-report.md
+          echo "" >> build-report.md
+          echo "**Build Time:** $(date)" >> build-report.md
+          echo "**Commit:** ${{ github.sha }}" >> build-report.md
+          echo "**Branch:** ${{ github.ref_name }}" >> build-report.md
+          echo "" >> build-report.md
+          echo "### APK Files:" >> build-report.md
+          find android/app/build/outputs -name "*.apk" -exec sh -c 'ls -lh "{}" | awk "{print \"- \" \$NF \" (\" \$5 \$6 ")"}' \; >> build-report.md 2>/dev/null || echo "- Build failed or no APK" >> build-report.md
+
+      - name: Upload build report
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-report
+          path: build-report.md
+          retention-days: 7
+
+  check-code-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check C++ file headers
+        run: |
+          echo "=== Checking C++ files have copyright headers ==="
+          MISSING=0
+          for f in $(find android/app/src/main/cpp -name "*.cpp" -o -name "*.h" | sort); do
+            if ! head -1 "$f" | grep -q "Copyright\|MIT License\|pragma"; then
+              echo "WARNING: $f has no copyright header"
+              MISSING=$((MISSING+1))
+            fi
+          done
+          echo "Files without headers: $MISSING"
+
+      - name: Check Java file structure
+        run: |
+          echo "=== Java source files ==="
+          find android -name "*.java" -type f | sort
+          echo "=== XML resource files ==="
+          find android -name "*.xml" -type f | sort
+
+  verify-structure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify project structure
+        run: |
+          echo "=== Project Structure ==="
+          REQUIRED_FILES=(
+            "android/build.gradle"
+            "android/settings.gradle"
+            "android/gradle.properties"
+            "android/app/build.gradle"
+            "android/app/src/main/AndroidManifest.xml"
+            "android/app/src/main/cpp/CMakeLists.txt"
+            "android/app/src/main/java/com/saba/viewer/MainActivity.java"
+          )
+          MISSING=0
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "MISSING: $f"
+              MISSING=$((MISSING+1))
+            else
+              echo "OK: $f"
+            fi
+          done
+          if [ $MISSING -gt 0 ]; then
+            echo "FAILED: $MISSING required files missing"
+            exit 1
+          fi
+          echo "All required files present!"

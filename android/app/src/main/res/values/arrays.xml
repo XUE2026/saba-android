@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="filter_options">
+        <item>@string/filter_none</item>
+        <item>@string/filter_white_bright</item>
+        <item>@string/filter_skin_bright</item>
+        <item>@string/filter_dark</item>
+        <item>@string/filter_genshin_day</item>
+        <item>@string/filter_genshin_night</item>
+        <item>@string/filter_genshin_dusk</item>
+    </string-array>
+    <string-array name="orientation_options">
+        <item>@string/orientation_auto</item>
+        <item>@string/orientation_portrait</item>
+        <item>@string/orientation_landscape</item>
+    </string-array>
+</resources>

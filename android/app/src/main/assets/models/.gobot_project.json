@@ -1,0 +1,35 @@
+{
+    "name": "Saba MMD Viewer",
+    "version": "1.0.0",
+    "author": "xueyixuan2026",
+    "github": "https://github.com/XUE2026",
+    "license": "MIT",
+    "original_author": "benikabocha",
+    "original_license": "MIT",
+    "original_source": "https://github.com/benikabocha/saba",
+    "description": {
+        "en": "Saba MMD Viewer for Android - A powerful MMD model viewer",
+        "cn": "Saba MMD 查看器 Android版 - 功能强大的 MMD 模型查看器",
+        "jp": "Saba MMD ビューアー Android版 - 強力な MMD モデルビューアー"
+    },
+    "android": {
+        "package": "com.saba.viewer",
+        "min_sdk": 24,
+        "target_sdk": 34,
+        "abi_filters": ["arm64-v8a", "armeabi-v7a", "x86_64"]
+    },
+    "features": {
+        "model_formats": [".pmx", ".pmd", ".fbx", ".obj", ".x"],
+        "motion_formats": [".vmd", ".vpd"],
+        "gobot_formats": [".gobot"],
+        "filters": ["none", "white_bright", "skin_bright", "dark", "genshin_day", "genshin_night", "genshin_dusk"],
+        "builtin_actions": ["idle", "jump", "run", "walk"],
+        "builtin_primitives": ["sun", "cube", "sphere", "cone", "cylinder"],
+        "builtin_environments": ["floor", "sky", "grass", "dirt", "asphalt"]
+    },
+    "build": {
+        "system": "gradle",
+        "ndk_version": "25.2.9519653",
+        "cmake_version": "3.22.1"
+    }
+}

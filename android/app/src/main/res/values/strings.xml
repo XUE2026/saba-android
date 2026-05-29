@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Saba MMD Viewer</string>
+    <string name="settings">Settings</string>
+    <string name="load_model">Load Model</string>
+    <string name="load_motion">Load Motion</string>
+    <string name="load_scene">Load Scene</string>
+    <string name="record_action">Record Action</string>
+    <string name="play_action">Play Action</string>
+    <string name="stop_action">Stop</string>
+    <string name="reset_camera">Reset Camera</string>
+    <string name="filter_none">None</string>
+    <string name="filter_white_bright">White Bright</string>
+    <string name="filter_skin_bright">Skin Bright</string>
+    <string name="filter_dark">Dark</string>
+    <string name="filter_genshin_day">Genshin Day</string>
+    <string name="filter_genshin_night">Genshin Night</string>
+    <string name="filter_genshin_dusk">Genshin Dusk</string>
+    <string name="orientation_portrait">Portrait</string>
+    <string name="orientation_landscape">Landscape</string>
+    <string name="orientation_auto">Auto</string>
+    <string name="bone_control">Bone Control</string>
+    <string name="jump">Jump</string>
+    <string name="run">Run</string>
+    <string name="walk">Walk</string>
+    <string name="export_action">Export Action</string>
+    <string name="import_action">Import Action</string>
+    <string name="environment_settings">Environment</string>
+    <string name="filter_settings">Filter Settings</string>
+    <string name="about">About</string>
+    <string name="version">Version 1.0.0</string>
+    <string name="copyright">Copyright benikabocha, xueyixuan2026</string>
+    <string name="license">MIT License</string>
+</resources>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Saba MMD 查看器</string>
+    <string name="settings">设置</string>
+    <string name="load_model">加载模型</string>
+    <string name="load_motion">加载动作</string>
+    <string name="load_scene">加载场景</string>
+    <string name="record_action">录制动作</string>
+    <string name="play_action">播放动作</string>
+    <string name="stop_action">停止</string>
+    <string name="reset_camera">重置视角</string>
+    <string name="filter_none">无滤镜</string>
+    <string name="filter_white_bright">白亮滤镜</string>
+    <string name="filter_skin_bright">肤亮滤镜</string>
+    <string name="filter_dark">黑暗滤镜</string>
+    <string name="filter_genshin_day">原神滤镜-白天</string>
+    <string name="filter_genshin_night">原神滤镜-晚上</string>
+    <string name="filter_genshin_dusk">原神滤镜-黄昏</string>
+    <string name="orientation_portrait">竖向</string>
+    <string name="orientation_landscape">横向</string>
+    <string name="orientation_auto">自动</string>
+    <string name="bone_control">骨骼控制</string>
+    <string name="jump">跳跃</string>
+    <string name="run">奔跑</string>
+    <string name="walk">行走</string>
+    <string name="export_action">导出动作</string>
+    <string name="import_action">导入动作</string>
+    <string name="environment_settings">环境设置</string>
+    <string name="filter_settings">滤镜设置</string>
+    <string name="about">关于</string>
+    <string name="version">版本 1.0.0</string>
+    <string name="copyright">版权所有 benikabocha, xueyixuan2026</string>
+    <string name="license">MIT 许可证</string>
+</resources>
