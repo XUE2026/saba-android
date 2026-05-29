@@ -30,6 +30,7 @@ include_directories(${SABA_EXTERNAL_DIR}/tinyxfileloader/include)
 include_directories(${SABA_EXTERNAL_DIR}/tinyddsloader/include)
 include_directories(${SABA_EXTERNAL_DIR}/fcpp)
 include_directories(${SABA_EXTERNAL_DIR}/gobot/include)
+include_directories(${SABA_PROJECT_ROOT}/gobot/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_definitions(-DANDROID)
