@@ -36,8 +36,16 @@ jobs:
                      "ndk;25.2.9519653" \
                      "cmdline-tools;latest"
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Generate Gradle Wrapper
+        run: |
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          export ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT
+          # Download Gradle and generate wrapper
+          curl -sL "https://services.gradle.org/distributions/gradle-8.4-bin.zip" -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/gradle
+          /tmp/gradle/gradle-8.4/bin/gradle wrapper --gradle-version 8.4
+          # Make gradlew executable
+          chmod +x gradlew
 
       - name: Build APK with Gradle
         run: ./gradlew assembleDebug
