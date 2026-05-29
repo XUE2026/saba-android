@@ -8,7 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-get_filename_component(SABA_PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../.. REALPATH)
+get_filename_component(SABA_PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/../../../../ REALPATH)
 get_filename_component(SABA_SOURCE_DIR ${SABA_PROJECT_ROOT}/src REALPATH)
 get_filename_component(SABA_VIEWER_DIR ${SABA_PROJECT_ROOT}/viewer REALPATH)
 get_filename_component(SABA_EXTERNAL_DIR ${SABA_PROJECT_ROOT}/external REALPATH)
