@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - environment
+      - master
+      - "releases/**"
   pull_request:
     branches:
       - master
@@ -35,6 +37,15 @@ jobs:
                      "build-tools;34.0.0" \
                      "ndk;25.2.9519653" \
                      "cmdline-tools;latest"
+
+      - name: Generate Gradle Wrapper (if missing)
+        run: |
+          if [ ! -f "./gradlew" ] || [ ! -f "./gradle/wrapper/gradle-wrapper.jar" ]; then
+            echo "Gradle wrapper files missing, generating..."
+            gradle wrapper --gradle-version 8.4
+          else
+            echo "Gradle wrapper files found."
+          fi
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
