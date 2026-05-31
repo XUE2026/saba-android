@@ -43,8 +43,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build
 
+      - name: Install Gradle
+        run: |
+          GRADLE_VERSION=8.5
+          if ! command -v gradle &> /dev/null || ! gradle --version | grep -q $GRADLE_VERSION; then
+            curl -L -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+            sudo unzip -q /tmp/gradle.zip -d /opt
+            sudo ln -sf "/opt/gradle-${GRADLE_VERSION}/bin/gradle" /usr/local/bin/gradle
+          fi
+          gradle --version
+
       - name: Build APK with Gradle
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: |
+          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          gradle assembleDebug --no-daemon --stacktrace
 
       - name: Wait for 3 minutes before verification
         run: sleep 180
