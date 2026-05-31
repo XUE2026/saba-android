@@ -255,8 +255,12 @@ set(IMGUI_SOURCES
     ${SABA_EXTERNAL_DIR}/imgui/src/ImGuizmo.cpp
 )
 
-# gl3w - Not used on Android; Android NDK provides GLES3 headers natively.
-# Use <GLES3/gl3.h> and <GLES3/gl3ext.h> instead.
+# ============================================================
+# gl3w (OpenGL loader wrapper)
+# ============================================================
+set(GL3W_SOURCES
+    ${SABA_EXTERNAL_DIR}/gl3w/src/gl3w.c
+)
 
 # ============================================================
 # Native bridge (Android-specific JNI entry point)
@@ -278,6 +282,7 @@ add_library(
     ${FCPP_SOURCES}
     ${LUA_SOURCES}
     ${IMGUI_SOURCES}
+    ${GL3W_SOURCES}
 )
 
 # ============================================================
