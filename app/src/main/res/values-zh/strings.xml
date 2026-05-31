@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Saba MMD 查看器</string>
+    <string name="app_description">基于 Saba 引擎的 MMD (MikuMikuDance) 模型查看器</string>
+    <string name="action_open">打开模型</string>
+    <string name="action_play">播放动画</string>
+    <string name="action_stop">停止</string>
+    <string name="action_settings">设置</string>
+    <string name="action_about">关于</string>
+    <string name="action_exit">退出</string>
+    <string name="settings_orientation">屏幕方向</string>
+    <string name="orientation_auto">自动旋转</string>
+    <string name="orientation_landscape">横屏</string>
+    <string name="orientation_portrait">竖屏</string>
+    <string name="settings_msaa">多重采样抗锯齿</string>
+    <string name="settings_language">语言</string>
+    <string name="about_text">Saba MMD 查看器 - Android 移植版\nOpenGL ES 3.0\n由 Saba 引擎驱动</string>
+</resources>

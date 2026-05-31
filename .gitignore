@@ -3,3 +3,10 @@ build
 /mmd2obj.dir
 /x64
 /saba_viewer.dir
+.gradle/
+local.properties
+*.iml
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

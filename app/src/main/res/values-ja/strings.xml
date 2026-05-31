@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Saba MMD ビューア</string>
+    <string name="app_description">Saba エンジンを使用した MMD (MikuMikuDance) モデルビューア</string>
+    <string name="action_open">モデルを開く</string>
+    <string name="action_play">アニメーション再生</string>
+    <string name="action_stop">停止</string>
+    <string name="action_settings">設定</string>
+    <string name="action_about">情報</string>
+    <string name="action_exit">終了</string>
+    <string name="settings_orientation">画面の向き</string>
+    <string name="orientation_auto">自動回転</string>
+    <string name="orientation_landscape">横画面</string>
+    <string name="orientation_portrait">縦画面</string>
+    <string name="settings_msaa">マルチサンプルアンチエイリアス</string>
+    <string name="settings_language">言語</string>
+    <string name="about_text">Saba MMD ビューア - Android 移植版\nOpenGL ES 3.0\nPowered by Saba Engine</string>
+</resources>
