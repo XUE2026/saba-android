@@ -14,24 +14,12 @@ android {
         versionName = "1.0.0"
 
         ndk {
-            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64")
         }
 
         externalNativeBuild {
             cmake {
-                cppFlags += listOf(
-                    "-std=c++14",
-                    "-fexceptions",
-                    "-frtti",
-                    "-Wall",
-                    "-Wno-unused-variable",
-                    "-Wno-unused-parameter"
-                )
-                arguments += listOf(
-                    "-DANDROID_STL=c++_shared",
-                    "-DANDROID_TOOLCHAIN=clang",
-                    "-DANDROID_PLATFORM=android-24"
-                )
+                cppFlags += "-std=c++17 -frtti -fexceptions"
             }
         }
     }

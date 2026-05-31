@@ -43,48 +43,27 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build
 
-      - name: Install Gradle 8.5
-        run: |
-          set -e
-          echo "System Gradle version:"
-          gradle --version 2>&1 | head -3 || echo "No system Gradle found"
-          echo "Downloading Gradle 8.5..."
-          curl --connect-timeout 30 --max-time 180 -L -o /tmp/gradle.zip \
-            "https://services.gradle.org/distributions/gradle-8.5-bin.zip"
-          echo "Extracting Gradle 8.5..."
-          sudo unzip -q /tmp/gradle.zip -d /opt
-          sudo ln -sf /opt/gradle-8.5/bin/gradle /usr/local/bin/gradle
-          echo "Using Gradle:"
-          gradle --version 2>&1 | head -5
-
       - name: Show ANDROID_HOME and SDK path
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
-          ls -la "$ANDROID_HOME/platforms/" 2>/dev/null || echo "No platforms dir at ANDROID_HOME"
-          ls -la "$ANDROID_SDK_ROOT/platforms/" 2>/dev/null || echo "No platforms dir at ANDROID_SDK_ROOT"
-          ls -la "$ANDROID_HOME/ndk/" 2>/dev/null || echo "No ndk dir at ANDROID_HOME"
-          echo "ANDROID_HOME=$ANDROID_HOME" > local.properties
-          echo "sdk.dir=$ANDROID_HOME" >> local.properties
-          echo "local.properties content:"
+          SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          echo "sdk.dir=$SDK_PATH" > local.properties
+          echo "ANDROID_HOME=$SDK_PATH" >> $GITHUB_ENV
           cat local.properties
 
-      - name: Build APK with Gradle
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Build APK with Gradle wrapper
         run: |
-          echo "=== Starting build ==="
-          echo "Gradle version:"
-          gradle --version 2>&1 | head -5
-          echo "=== Running assembleDebug ==="
-          gradle assembleDebug --no-daemon --stacktrace --info 2>&1 | tee /tmp/gradle_build.log | tail -150
+          echo "Android SDK: $ANDROID_HOME"
+          echo "Gradle wrapper will download Gradle 8.4 automatically"
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_build.log | tail -200
           GRADLE_EXIT=${PIPESTATUS[0]}
-          echo "=== Full log saved ==="
           echo "Exit code: $GRADLE_EXIT"
           exit $GRADLE_EXIT
-        timeout-minutes: 15
-
-      - name: Wait for 3 minutes before verification
-        run: sleep 180
+        timeout-minutes: 30
 
       - name: Verify APK exists and check size
         run: |
