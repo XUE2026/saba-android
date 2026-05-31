@@ -58,14 +58,18 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
-          ls -la "$ANDROID_HOME/platforms/" 2>/dev/null || echo "No platforms dir"
-          ls -la "$ANDROID_HOME/ndk/" 2>/dev/null || echo "No ndk dir"
+          ls -la "$ANDROID_HOME/platforms/" 2>/dev/null || echo "No platforms dir at ANDROID_HOME"
+          ls -la "$ANDROID_SDK_ROOT/platforms/" 2>/dev/null || echo "No platforms dir at ANDROID_SDK_ROOT"
+          ls -la "$ANDROID_HOME/ndk/" 2>/dev/null || echo "No ndk dir at ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME" > local.properties
+          echo "sdk.dir=$ANDROID_HOME" >> local.properties
+          echo "local.properties content:"
+          cat local.properties
 
       - name: Build APK with Gradle
         run: |
           export ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}
-          export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-$ANDROID_HOME}
-          echo "Using ANDROID_HOME=$ANDROID_HOME"
+          cat local.properties
           gradle assembleDebug --no-daemon --stacktrace
         timeout-minutes: 15
 
