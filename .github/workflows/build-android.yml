@@ -38,14 +38,13 @@ jobs:
                      "ndk;25.2.9519653" \
                      "cmdline-tools;latest"
 
-      - name: Regenerate Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.4
-
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
+      - name: Install CMake and Ninja
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build
 
       - name: Build APK with Gradle
-        run: ./gradlew --no-daemon assembleDebug
+        run: gradle assembleDebug --no-daemon --stacktrace
 
       - name: Wait for 3 minutes before verification
         run: sleep 180
