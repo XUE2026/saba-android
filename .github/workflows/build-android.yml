@@ -59,6 +59,25 @@ jobs:
           exit ${PIPESTATUS[0]}
         timeout-minutes: 30
 
+      - name: Extract and post build errors as annotations
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const log = fs.readFileSync('/tmp/gradle_build.log', 'utf8');
+            const lines = log.split('\n');
+            
+            // Find error lines
+            const errors = lines.filter(l => 
+              /(?:ERROR|error:|FAILED|Error:|BUILD FAILED|What went wrong|cannot find|unresolved|fatal error)/i.test(l)
+            ).slice(0, 20);
+            
+            if (errors.length > 0) {
+              const msg = errors.join('\n').substring(0, 64000);
+              core.error(msg);
+            }
+
       - name: Print build log tail (always)
         if: always()
         run: |
