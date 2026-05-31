@@ -67,6 +67,16 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "org.jetbrains.kotlin" && requested.name.startsWith("kotlin-stdlib")) {
+                useVersion("1.8.22")
+            }
+        }
+    }
+}
+
 dependencies {
     implementation("androidx.core:core:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
