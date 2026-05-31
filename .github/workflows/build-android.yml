@@ -38,13 +38,52 @@ jobs:
                      "ndk;25.2.9519653" \
                      "cmdline-tools;latest"
 
-      - name: Install CMake and Ninja
+      - name: Install CMake, Ninja and Bullet
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake ninja-build
+          sudo apt-get install -y cmake ninja-build libbullet-dev
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Build Bullet Physics for Android
+        run: |
+          NDK_PATH=$(ls -d /usr/local/lib/android/sdk/ndk/*/ 2>/dev/null | head -1)
+          echo "Using NDK: $NDK_PATH"
+          echo "BULLET_ANDROID_DIR=/tmp/bullet-android" >> $GITHUB_ENV
+
+          if [ ! -d /tmp/bullet3 ]; then
+            git clone --depth 1 --branch 3.25 https://github.com/bulletphysics/bullet3.git /tmp/bullet3
+          fi
+          cd /tmp/bullet3
+
+          for ABI in arm64-v8a armeabi-v7a x86_64; do
+            BUILD_DIR="build_${ABI}"
+            if [ -f "${BUILD_DIR}/.completed" ]; then
+              echo "Bullet already built for ${ABI}, skipping"
+              continue
+            fi
+            mkdir -p "${BUILD_DIR}"
+            cd "${BUILD_DIR}"
+            cmake .. \
+              -DCMAKE_TOOLCHAIN_FILE="${NDK_PATH}/build/cmake/android.toolchain.cmake" \
+              -DANDROID_ABI="${ABI}" \
+              -DANDROID_PLATFORM=24 \
+              -DCMAKE_INSTALL_PREFIX="/tmp/bullet-android/${ABI}" \
+              -DBUILD_SHARED_LIBS=ON \
+              -DBUILD_BULLET2_DEMOS=OFF \
+              -DBUILD_BULLET3=OFF \
+              -DBUILD_EXTRAS=OFF \
+              -DBUILD_UNIT_TESTS=OFF \
+              -DINSTALL_LIBS=ON \
+              -DINSTALL_CMAKE_FILES=ON \
+              -DUSE_GRAPHICAL_BENCHMARK=OFF
+            cmake --build . --target install -j$(nproc)
+            touch .completed
+            cd ..
+          done
+          echo "Bullet Physics for Android built successfully"
+        timeout-minutes: 15
 
       - name: Test Gradle project configuration
         run: |

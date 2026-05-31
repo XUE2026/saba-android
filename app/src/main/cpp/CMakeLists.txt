@@ -41,6 +41,36 @@ include_directories(${SABA_EXTERNAL_DIR}/fcpp)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # ============================================================
+# Bullet Physics (system or Android cross-compiled)
+# ============================================================
+if(DEFINED ENV{BULLET_ANDROID_DIR})
+    set(BULLET_ROOT "$ENV{BULLET_ANDROID_DIR}/${ANDROID_ABI}")
+    message(STATUS "Using Android Bullet Physics at: ${BULLET_ROOT}")
+    include_directories(${BULLET_ROOT}/include/bullet)
+    link_directories(${BULLET_ROOT}/lib)
+    set(BULLET_LIBRARIES
+        BulletDynamics
+        BulletCollision
+        LinearMath
+    )
+else()
+    find_package(Bullet QUIET)
+    if(BULLET_FOUND)
+        message(STATUS "Using system Bullet: ${BULLET_INCLUDE_DIRS}")
+        include_directories(${BULLET_INCLUDE_DIRS})
+        set(BULLET_LIBRARIES ${BULLET_LIBRARIES})
+    else()
+        message(STATUS "Bullet not found, checking /usr/include/bullet")
+        include_directories(/usr/include/bullet)
+        set(BULLET_LIBRARIES
+            BulletDynamics
+            BulletCollision
+            LinearMath
+        )
+    endif()
+endif()
+
+# ============================================================
 # Compile definitions
 # ============================================================
 add_definitions(-DANDROID)
@@ -260,6 +290,7 @@ target_link_libraries(
     GLESv3
     log
     z
+    ${BULLET_LIBRARIES}
 )
 
 # ============================================================
