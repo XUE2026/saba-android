@@ -1,14 +1,13 @@
 package com.saba.viewer;
 
-import android.app.NativeActivity;
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
-public class MainActivity extends NativeActivity {
+public class MainActivity extends Activity {
 
     private SabaNativeSurfaceView mNativeSurfaceView;
     private boolean mImmersiveModeEnabled = true;
