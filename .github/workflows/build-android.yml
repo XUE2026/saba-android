@@ -76,7 +76,11 @@ jobs:
           echo "Gradle version:"
           gradle --version 2>&1 | head -5
           echo "=== Running assembleDebug ==="
-          gradle assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -100
+          gradle assembleDebug --no-daemon --stacktrace --info 2>&1 | tee /tmp/gradle_build.log | tail -150
+          GRADLE_EXIT=${PIPESTATUS[0]}
+          echo "=== Full log saved ==="
+          echo "Exit code: $GRADLE_EXIT"
+          exit $GRADLE_EXIT
         timeout-minutes: 15
 
       - name: Wait for 3 minutes before verification
