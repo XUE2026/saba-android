@@ -43,20 +43,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y cmake ninja-build
 
-      - name: Install Gradle
+      - name: Install Gradle 8.5
         run: |
-          GRADLE_VERSION=8.5
-          echo "Current Gradle version:"
-          gradle --version 2>&1 | head -5
-          if ! command -v gradle &> /dev/null || gradle --version 2>&1 | grep -qv "Gradle $GRADLE_VERSION"; then
-            echo "Downloading Gradle $GRADLE_VERSION..."
-            curl --connect-timeout 30 --max-time 120 -L -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
-            echo "Unzipping..."
-            sudo unzip -q /tmp/gradle.zip -d /opt
-            sudo ln -sf "/opt/gradle-${GRADLE_VERSION}/bin/gradle" /usr/local/bin/gradle
-          fi
+          set -e
+          echo "System Gradle version:"
+          gradle --version 2>&1 | head -3 || echo "No system Gradle found"
+          echo "Downloading Gradle 8.5..."
+          curl --connect-timeout 30 --max-time 180 -L -o /tmp/gradle.zip \
+            "https://services.gradle.org/distributions/gradle-8.5-bin.zip"
+          echo "Extracting Gradle 8.5..."
+          sudo unzip -q /tmp/gradle.zip -d /opt
+          sudo ln -sf /opt/gradle-8.5/bin/gradle /usr/local/bin/gradle
           echo "Using Gradle:"
-          gradle --version
+          gradle --version 2>&1 | head -5
 
       - name: Show ANDROID_HOME and SDK path
         run: |
