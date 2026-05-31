@@ -45,12 +45,17 @@ jobs:
 
       - name: Install Gradle
         run: |
-          GRADLE_VERSION=8.2
-          if ! command -v gradle &> /dev/null || ! gradle --version 2>&1 | grep -q "Gradle $GRADLE_VERSION"; then
-            curl -L -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+          GRADLE_VERSION=8.5
+          echo "Current Gradle version:"
+          gradle --version 2>&1 | head -5
+          if ! command -v gradle &> /dev/null || gradle --version 2>&1 | grep -qv "Gradle $GRADLE_VERSION"; then
+            echo "Downloading Gradle $GRADLE_VERSION..."
+            curl --connect-timeout 30 --max-time 120 -L -o /tmp/gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip"
+            echo "Unzipping..."
             sudo unzip -q /tmp/gradle.zip -d /opt
             sudo ln -sf "/opt/gradle-${GRADLE_VERSION}/bin/gradle" /usr/local/bin/gradle
           fi
+          echo "Using Gradle:"
           gradle --version
 
       - name: Show ANDROID_HOME and SDK path
