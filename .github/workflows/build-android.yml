@@ -46,9 +46,15 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build APK with Gradle
+      - name: Test Gradle project configuration
         run: |
           chmod +x ./gradlew
+          ./gradlew projects --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_config.log
+          echo "Project configuration: SUCCESS"
+        timeout-minutes: 5
+
+      - name: Build APK with Gradle
+        run: |
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_build.log
           exit ${PIPESTATUS[0]}
         timeout-minutes: 30
@@ -56,20 +62,22 @@ jobs:
       - name: Print build log tail (always)
         if: always()
         run: |
-          if [ -f /tmp/gradle_build.log ]; then
-            echo "=== Last 50 lines of build log ==="
-            tail -50 /tmp/gradle_build.log
-            echo "=== End of build log ==="
-          else
-            echo "Build log not found"
-          fi
+          for log in /tmp/gradle_config.log /tmp/gradle_build.log; do
+            if [ -f "$log" ]; then
+              echo "=== Last 50 lines of $(basename $log) ==="
+              tail -50 "$log"
+              echo "=== End of $(basename $log) ==="
+            fi
+          done
 
       - name: Upload Gradle build log (always)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: gradle-build-log
-          path: /tmp/gradle_build.log
+          name: gradle-build-logs
+          path: |
+            /tmp/gradle_config.log
+            /tmp/gradle_build.log
           if-no-files-found: warn
 
       - name: Verify APK exists and check size
