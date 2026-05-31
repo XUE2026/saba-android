@@ -38,20 +38,14 @@ jobs:
                      "ndk;25.2.9519653" \
                      "cmdline-tools;latest"
 
-      - name: Generate Gradle Wrapper (if missing)
-        run: |
-          if [ ! -f "./gradlew" ] || [ ! -f "./gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Gradle wrapper files missing, generating..."
-            gradle wrapper --gradle-version 8.4
-          else
-            echo "Gradle wrapper files found."
-          fi
+      - name: Regenerate Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.4
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Build APK with Gradle
-        run: ./gradlew assembleDebug
+        run: ./gradlew --no-daemon assembleDebug
 
       - name: Wait for 3 minutes before verification
         run: sleep 180
