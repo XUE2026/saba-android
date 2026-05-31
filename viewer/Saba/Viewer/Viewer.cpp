@@ -31,8 +31,10 @@
 #include <Saba/GL/Model/XFile/GLXFileModelDrawer.h>
 
 #include <imgui.h>
+#ifndef SABA_ANDROID
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#endif
 #include <ImGuizmo.h>
 
 #include <glm/glm.hpp>
@@ -147,19 +149,23 @@ namespace saba
 		, m_currentMSAAEnable(false)
 		, m_currentMSAACount(0)
 	{
+#ifndef SABA_ANDROID
 		if (!glfwInit())
 		{
 			m_glfwInitialized = false;
 		}
 		m_glfwInitialized = true;
+#endif
 	}
 
 	Viewer::~Viewer()
 	{
+#ifndef SABA_ANDROID
 		if (m_glfwInitialized)
 		{
 			glfwTerminate();
 		}
+#endif
 	}
 
 	bool Viewer::Initialize(const InitializeParameter& initParam)
@@ -172,15 +178,18 @@ namespace saba
 		m_imguiLogSink = logger->AddSink<ImGUILogSink>();
 
 		SABA_INFO("CurDir = {}", m_context.GetWorkDir());
+#ifndef SABA_ANDROID
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#endif
 		if (m_initParam.m_msaaEnable)
 		{
 			m_context.EnableMSAA(true);
 			m_context.SetMSAACount(m_initParam.m_msaaCount);
 		}
+#ifndef SABA_ANDROID
 		m_window = glfwCreateWindow(1280, 800, "Saba Viewer", nullptr, nullptr);
 
 		if (m_window == nullptr)
@@ -198,14 +207,17 @@ namespace saba
 		glfwSetDropCallback(m_window, OnDropStub);
 
 		glfwMakeContextCurrent(m_window);
+#endif
 
 		// imguiの初期化
 		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		ImGui::StyleColorsDark();
+#ifndef SABA_ANDROID
 		ImGui_ImplGlfw_InitForOpenGL(m_window, false);
 		ImGui_ImplOpenGL3_Init("#version 150");
+#endif
 
 		std::string fontDir = PathUtil::Combine(
 			m_context.GetResourceDir(),
@@ -224,11 +236,13 @@ namespace saba
 		);
 
 		// gl3wの初期化
+#ifndef SABA_ANDROID
 		if (gl3wInit() != 0)
 		{
 			SABA_ERROR("gl3w Init Fail.");
 			return false;
 		}
+#endif
 
 		if (!m_context.Initialize())
 		{
@@ -249,7 +263,9 @@ namespace saba
 		m_uColor2 = glGetUniformLocation(m_bgProg, "u_Color2");
 		m_bgVAO.Create();
 
+#ifndef SABA_ANDROID
 		m_mouse.Initialize(m_window);
+#endif
 		m_context.m_camera.Initialize(glm::vec3(0), 10.0f);
 		if (!m_grid.Initialize(m_context, 0.5f, 10, 5))
 		{
@@ -286,8 +302,10 @@ namespace saba
 		logger->RemoveSink(m_imguiLogSink.get());
 		m_imguiLogSink.reset();
 
+#ifndef SABA_ANDROID
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+#endif
 		ImGui::DestroyContext();
 
 		m_context.Uninitialize();
@@ -295,6 +313,7 @@ namespace saba
 
 	int Viewer::Run()
 	{
+#ifndef SABA_ANDROID
 		while (!glfwWindowShouldClose(m_window))
 		{
 			ImGui_ImplOpenGL3_NewFrame();
@@ -372,6 +391,7 @@ namespace saba
 			glfwSwapBuffers(m_window);
 			glfwPollEvents();
 		}
+#endif
 
 		return 0;
 	}
@@ -2721,6 +2741,7 @@ namespace saba
 		return nullptr;
 	}
 
+	#ifndef SABA_ANDROID
 	void Viewer::OnMouseButtonStub(GLFWwindow * window, int button, int action, int mods)
 	{
 		ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
@@ -2777,7 +2798,9 @@ namespace saba
 			m_mouseLockMode = MouseLockMode::RequestLock;
 		}
 	}
+#endif
 
+	#ifndef SABA_ANDROID
 	void Viewer::OnScrollStub(GLFWwindow * window, double offsetx, double offsety)
 	{
 		ImGui_ImplGlfw_ScrollCallback(window, offsetx, offsety);
@@ -2793,7 +2816,9 @@ namespace saba
 	{
 		m_mouse.SetScroll(offsetx, offsety);
 	}
+#endif
 
+	#ifndef SABA_ANDROID
 	void Viewer::OnKeyStub(GLFWwindow * window, int key, int scancode, int action, int mods)
 	{
 		ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
@@ -2812,7 +2837,9 @@ namespace saba
 			m_context.EnableUI(!m_context.IsUIEnabled());
 		}
 	}
+#endif
 
+#ifndef SABA_ANDROID
 	void Viewer::OnCharStub(GLFWwindow * window, unsigned int codepoint)
 	{
 		ImGui_ImplGlfw_CharCallback(window, codepoint);
@@ -2827,7 +2854,9 @@ namespace saba
 	void Viewer::OnChar(unsigned int codepoint)
 	{
 	}
+#endif
 
+	#ifndef SABA_ANDROID
 	void Viewer::OnDropStub(GLFWwindow * window, int count, const char ** paths)
 	{
 		Viewer* viewer = (Viewer*)glfwGetWindowUserPointer(window);
@@ -2887,5 +2916,6 @@ namespace saba
 		m_saveScrollX = x;
 		m_saveScrollY = y;
 	}
+#endif
 
 }

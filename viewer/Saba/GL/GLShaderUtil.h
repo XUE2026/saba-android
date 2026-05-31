@@ -9,7 +9,12 @@
 #include "GLObject.h"
 
 #include <string>
+#ifdef SABA_ANDROID
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#else
 #include <GL/gl3w.h>
+#endif
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>

@@ -9,14 +9,14 @@
 #include <Saba/Base/Singleton.h>
 #include <Saba/Base/Time.h>
 
-#include <Saba/Model/MMD/PMXFile.h>
-#include <Saba/Model/MMD/VMDFile.h>
-#include <Saba/Model/MMD/VMDAnimation.h>
-#include <Saba/Model/MMD/MMDModel.h>
 #include <Saba/Model/MMD/PMXModel.h>
+#include <Saba/Model/MMD/PMDModel.h>
+#include <Saba/Model/MMD/VMDFile.h>
 
 #include <Saba/GL/Model/MMD/GLMMDModel.h>
 #include <Saba/GL/Model/MMD/GLMMDModelDrawContext.h>
+#include <Saba/GL/Model/MMD/GLMMDModelDrawer.h>
+#include <Saba/Viewer/ViewerContext.h>
 
 #include <android/log.h>
 #include <GLES3/gl3.h>
@@ -86,6 +86,18 @@ bool AndroidViewer::initialize(const char* assetPath)
 
     saba::Singleton<saba::Logger>::Get();
 
+    mViewerContext = std::make_unique<saba::ViewerContext>();
+    if (!mViewerContext->Initialize()) {
+        LOGE("Failed to initialize ViewerContext.");
+        return false;
+    }
+
+    mDrawContext = std::make_unique<saba::GLMMDModelDrawContext>(mViewerContext.get());
+
+    if (!mViewerContext->GetShadowMap()->InitializeShader(mViewerContext.get())) {
+        LOGI("ShadowMap shader initialization skipped (non-critical).");
+    }
+
     mCamera.Initialize(glm::vec3(0.0f), 10.0f);
     mCamera.SetFovY(glm::radians(45.0f));
     mCamera.SetSize(1280.0f, 800.0f);
@@ -100,9 +112,9 @@ bool AndroidViewer::initialize(const char* assetPath)
     mActionRecorder = std::make_unique<ActionRecorder>();
     mBoneController = std::make_unique<BoneController>();
 
+    gobot::GobotFramework::getInstance().initialize(mAssetPath);
+
     mEnvironmentSystem->initialize();
-    mDrawContext = std::make_unique<saba::GLMMDModelDrawContext>();
-    mDrawContext->Initialize();
 
     mInitialized = true;
     LOGI("AndroidViewer initialized successfully.");
@@ -144,11 +156,15 @@ void AndroidViewer::step()
 
     mAnimationTime += elapsed;
 
-    for (auto& model : mGLModels) {
-        if (model->GetMMDModel()) {
-            model->GetMMDModel()->SetAnimationTime(mAnimationTime);
-            model->Update();
-        }
+    mViewerContext->SetAnimationTime(mAnimationTime);
+    mViewerContext->SetElapsedTime(elapsed);
+    mViewerContext->SetPlayMode(saba::ViewerContext::PlayMode::Play);
+    mViewerContext->SetFrameBufferSize(mWidth, mHeight);
+    mViewerContext->SetCamera(mCamera);
+    mViewerContext->SetLight(mLight);
+
+    for (auto& drawer : mModelDrawers) {
+        drawer->Update(mViewerContext.get());
     }
 
     glClearColor(0.15f, 0.15f, 0.2f, 1.0f);
@@ -157,15 +173,13 @@ void AndroidViewer::step()
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
-    glm::mat4 view = mCamera.GetViewMatrix();
-    glm::mat4 proj = mCamera.GetProjectionMatrix();
-    glm::mat4 viewProj = proj * view;
-
-    for (auto& model : mGLModels) {
-        model->Draw(mDrawContext.get(), view, viewProj, glm::vec3(0, 0, 0));
+    for (auto& drawer : mModelDrawers) {
+        drawer->Draw(mViewerContext.get());
     }
 
     if (mEnvironmentSystem) {
+        const auto& view = mCamera.GetViewMatrix();
+        const auto& proj = mCamera.GetProjectionMatrix();
         mEnvironmentSystem->render(view, proj, mLight.GetLightDirection());
     }
 }
@@ -180,13 +194,19 @@ void AndroidViewer::destroy()
 
     LOGI("Destroying AndroidViewer...");
 
-    mGLModels.clear();
+    mModelDrawers.clear();
+
+    mDrawContext.reset();
+
+    if (mViewerContext) {
+        mViewerContext->Uninitialize();
+        mViewerContext.reset();
+    }
 
     mActionRecorder.reset();
     mBoneController.reset();
     mFilterSystem.reset();
     mEnvironmentSystem.reset();
-    mDrawContext.reset();
 
     mInitialized = false;
     mTouchCount = 0;
@@ -293,13 +313,41 @@ void AndroidViewer::loadModel(const std::string& path)
 
     LOGI("Loading model: %s", path.c_str());
 
-    auto glModel = std::make_shared<saba::GLMMDModel>();
-    if (glModel->LoadPMXFile(path)) {
-        mGLModels.push_back(glModel);
-        LOGI("Model loaded successfully: %s", path.c_str());
+    std::string mmdDataDir = saba::PathUtil::GetDirectoryName(path);
+
+    std::shared_ptr<saba::MMDModel> mmdModel;
+
+    auto pmxModel = std::make_shared<saba::PMXModel>();
+    if (pmxModel->Load(path, mmdDataDir)) {
+        mmdModel = pmxModel;
+        LOGI("PMX model loaded: %s", path.c_str());
     } else {
-        LOGE("Failed to load model: %s", path.c_str());
+        auto pmdModel = std::make_shared<saba::PMDModel>();
+        if (pmdModel->Load(path, mmdDataDir)) {
+            mmdModel = pmdModel;
+            LOGI("PMD model loaded: %s", path.c_str());
+        } else {
+            LOGE("Failed to load model (PMX/PMD): %s", path.c_str());
+            return;
+        }
     }
+
+    auto glModel = std::make_shared<saba::GLMMDModel>();
+    if (!glModel->Create(mmdModel)) {
+        LOGE("Failed to create GLMMDModel.");
+        return;
+    }
+
+    auto drawer = std::make_shared<saba::GLMMDModelDrawer>(mDrawContext.get(), glModel);
+    if (!drawer->Create()) {
+        LOGE("Failed to create GLMMDModelDrawer.");
+        return;
+    }
+
+    drawer->SetBBox(mmdModel->GetBBoxMin(), mmdModel->GetBBoxMax());
+    mModelDrawers.push_back(drawer);
+
+    LOGI("Model loaded successfully: %s", path.c_str());
 }
 
 void AndroidViewer::loadMotion(const std::string& path)
@@ -313,17 +361,31 @@ void AndroidViewer::loadMotion(const std::string& path)
 
     LOGI("Loading motion: %s", path.c_str());
 
-    if (!mGLModels.empty()) {
-        auto model = mGLModels.back();
-        if (model->GetMMDModel()) {
-            saba::VMDAnimation vmdAnim;
-            if (vmdAnim.Load(path)) {
-                model->GetMMDModel()->SetAnimation(&vmdAnim);
-                mAnimationTime = 0.0;
-                LOGI("Motion loaded successfully: %s", path.c_str());
-            }
-        }
+    if (mModelDrawers.empty()) {
+        LOGE("No model loaded to apply motion.");
+        return;
     }
+
+    auto drawer = mModelDrawers.back();
+    auto* glModel = drawer->GetModel();
+    if (glModel == nullptr) {
+        LOGE("Drawer has no model.");
+        return;
+    }
+
+    saba::VMDFile vmd;
+    if (!saba::ReadVMDFile(&vmd, path.c_str())) {
+        LOGE("Failed to read VMD file: %s", path.c_str());
+        return;
+    }
+
+    if (!glModel->LoadAnimation(vmd)) {
+        LOGE("Failed to apply animation to model.");
+        return;
+    }
+
+    mAnimationTime = 0.0;
+    LOGI("Motion loaded successfully: %s", path.c_str());
 }
 
 void AndroidViewer::loadScene(const std::string& path)
@@ -339,8 +401,10 @@ void AndroidViewer::loadGobot(const std::string& path)
 {
     std::lock_guard<std::mutex> lock(mMutex);
     LOGI("Loading gobot: %s", path.c_str());
-    if (mActionRecorder) {
+
+    if (gobot::GobotFramework::getInstance().loadActionFile(path)) {
         mActionRecorder->loadAction(path);
+        LOGI("Gobot action file loaded: %s", path.c_str());
     }
 }
 

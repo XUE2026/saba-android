@@ -66,7 +66,12 @@ namespace saba
 
 		const glm::vec4& GetMMDGroundShadowColor() const { return m_mmdGroundShadowColor; };
 
+	#ifdef SABA_ANDROID
+	public:
+		ShadowMap* GetShadowMap() { return &m_shadowmap; }
+#else
 	private:
+#endif
 		void EnableUI(bool enable) { m_uiEnable = enable; }
 		void EnableCameraOverride(bool enable) { m_cameraOverride = enable; }
 		void EnableShadow(bool enable) { m_shadowEnabled = enable; }
@@ -84,6 +89,7 @@ namespace saba
 
 		void SetMMDGroundShadowColor(const glm::vec4& shadowColor) { m_mmdGroundShadowColor = shadowColor; }
 
+	private:
 		bool ResizeCaptureTexture();
 
 	private:

@@ -250,6 +250,7 @@ namespace saba
 		{
 			GLenum target = GL_INVALID_ENUM;
 			bool isArray = false;
+			#ifndef SABA_ANDROID
 			if (dds.GetTextureDimension() == DDSFile::TextureDimension::Texture1D)
 			{
 				if (dds.GetArraySize() > 1)
@@ -262,7 +263,9 @@ namespace saba
 					target = GL_TEXTURE_1D;
 				}
 			}
-			else if (dds.GetTextureDimension() == DDSFile::TextureDimension::Texture2D)
+			else
+			#endif
+			if (dds.GetTextureDimension() == DDSFile::TextureDimension::Texture2D)
 			{
 				if (dds.GetArraySize() > 1)
 				{
@@ -270,8 +273,12 @@ namespace saba
 					{
 						if (dds.GetArraySize() > 6)
 						{
+#ifndef SABA_ANDROID
 							target = GL_TEXTURE_CUBE_MAP_ARRAY;
 							isArray = true;
+#else
+							target = GL_TEXTURE_CUBE_MAP;
+#endif
 						}
 						else
 						{
@@ -310,6 +317,7 @@ namespace saba
 
 			switch (target)
 			{
+#ifndef SABA_ANDROID
 			case GL_TEXTURE_1D:
 				glTexStorage1D(target, dds.GetMipCount(), format.m_format,
 					dds.GetWidth());
@@ -318,6 +326,7 @@ namespace saba
 				glTexStorage2D(target, dds.GetMipCount(), format.m_format,
 					dds.GetWidth(), dds.GetArraySize());
 				break;
+#endif
 			case GL_TEXTURE_2D:
 				glTexStorage2D(target, dds.GetMipCount(), format.m_format,
 					dds.GetWidth(), dds.GetHeight());
@@ -334,10 +343,12 @@ namespace saba
 				glTexStorage3D(target, dds.GetMipCount(), format.m_format,
 					dds.GetWidth(), dds.GetHeight(), dds.GetDepth());
 				break;
+#ifndef SABA_ANDROID
 			case GL_TEXTURE_CUBE_MAP_ARRAY:
 				glTexStorage3D(target, dds.GetMipCount(), format.m_format,
 					dds.GetWidth(), dds.GetHeight(), dds.GetArraySize());
 				break;
+#endif
 			default:
 				glBindTexture(target, 0);
 				return false;
@@ -355,6 +366,7 @@ namespace saba
 						auto imageData = dds.GetImageData(level, layer * numFaces);
 						switch (target)
 						{
+#ifndef SABA_ANDROID
 						case GL_TEXTURE_1D:
 							if (IsCompressed(format.m_format))
 							{
@@ -370,6 +382,7 @@ namespace saba
 									format.m_type, imageData->m_mem);
 							}
 							break;
+#endif
 						case GL_TEXTURE_1D_ARRAY:
 						case GL_TEXTURE_2D:
 						case GL_TEXTURE_CUBE_MAP:

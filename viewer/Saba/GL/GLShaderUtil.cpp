@@ -20,18 +20,20 @@ namespace saba
 		{
 			switch (shaderType)
 			{
-			case GL_COMPUTE_SHADER:
-				return "Compute Shader";
 			case GL_VERTEX_SHADER:
 				return "Vertex Shader";
+			case GL_FRAGMENT_SHADER:
+				return "Fragment Shader";
+#ifndef SABA_ANDROID
+			case GL_COMPUTE_SHADER:
+				return "Compute Shader";
 			case GL_TESS_CONTROL_SHADER:
 				return "Tess Control Shader";
 			case GL_TESS_EVALUATION_SHADER:
 				return "Tess Evaluation Shader";
 			case GL_GEOMETRY_SHADER:
 				return "Geometry Shader";
-			case GL_FRAGMENT_SHADER:
-				return "Fragment Shader";
+#endif
 			default:
 				return "Unknown Shader Type";
 			}

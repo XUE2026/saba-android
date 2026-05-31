@@ -116,6 +116,7 @@ set(SABA_ANDROID_SOURCES
     environment_system.cpp
     action_recorder.cpp
     bone_controller.cpp
+    gobot_framework.cpp
 )
 
 # gl3w (for GLES this needs adaptation)

@@ -7,7 +7,12 @@
 #define SABA_GL_GLOBJECT_H_
 
 #include <atomic>
+#ifdef SABA_ANDROID
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#else
 #include <GL/gl3w.h>
+#endif
 
 namespace saba
 {

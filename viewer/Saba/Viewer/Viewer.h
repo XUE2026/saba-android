@@ -6,8 +6,13 @@
 #ifndef SABA_VIEWER_VIEWER_H_
 #define SABA_VIEWER_VIEWER_H_
 
+#ifdef SABA_ANDROID
+#include <GLES3/gl3.h>
+#include <GLES3/gl3ext.h>
+#else
 #include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
+#endif
 
 #include "ViewerContext.h"
 #include "ViewerCommand.h"

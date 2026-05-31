@@ -2,11 +2,13 @@
 #define ANDROID_VIEWER_H_
 
 #include "egl_core.h"
+#include "gobot_framework.h"
 
+#include <Saba/Viewer/ViewerContext.h>
 #include <Saba/Viewer/Camera.h>
 #include <Saba/Viewer/Light.h>
-#include <Saba/GL/Model/MMD/GLMMDModel.h>
 #include <Saba/GL/Model/MMD/GLMMDModelDrawContext.h>
+#include <Saba/GL/Model/MMD/GLMMDModelDrawer.h>
 
 #include <memory>
 #include <string>
@@ -57,10 +59,12 @@ private:
     bool mInitialized;
     std::string mAssetPath;
 
+    std::unique_ptr<saba::ViewerContext> mViewerContext;
+    std::unique_ptr<saba::GLMMDModelDrawContext> mDrawContext;
+    std::vector<std::shared_ptr<saba::GLMMDModelDrawer>> mModelDrawers;
+
     saba::Camera mCamera;
     saba::Light mLight;
-    std::unique_ptr<saba::GLMMDModelDrawContext> mDrawContext;
-    std::vector<std::shared_ptr<saba::GLMMDModel>> mGLModels;
 
     std::unique_ptr<FilterSystem> mFilterSystem;
     std::unique_ptr<EnvironmentSystem> mEnvironmentSystem;
