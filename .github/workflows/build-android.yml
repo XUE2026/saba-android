@@ -36,6 +36,7 @@ jobs:
           sdkmanager "platforms;android-34" \
                      "build-tools;34.0.0" \
                      "ndk;25.2.9519653" \
+                     "cmake;3.22.1" \
                      "cmdline-tools;latest"
 
       - name: Install CMake and Ninja
@@ -55,15 +56,27 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
+      - name: Check Gradle wrapper
+        run: |
+          ./gradlew --version --no-daemon 2>&1 | tee /tmp/gradle_version.log
+          echo "--- Gradle wrapper check done ---"
+
       - name: Build APK with Gradle wrapper
         run: |
           echo "Android SDK: $ANDROID_HOME"
-          echo "Gradle wrapper will download Gradle 8.4 automatically"
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_build.log | tail -200
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_build.log
           GRADLE_EXIT=${PIPESTATUS[0]}
           echo "Exit code: $GRADLE_EXIT"
           exit $GRADLE_EXIT
         timeout-minutes: 30
+
+      - name: Upload Gradle build log (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-build-log
+          path: /tmp/gradle_build.log
+          if-no-files-found: warn
 
       - name: Verify APK exists and check size
         run: |
