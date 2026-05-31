@@ -87,6 +87,32 @@ static GL3WglProc get_proc(const char *proc)
 	CFRelease(procname);
 	return res;
 }
+#elif defined(__ANDROID__)
+#include <dlfcn.h>
+#include <EGL/egl.h>
+
+static void *libgl;
+
+static void open_libgl(void)
+{
+	libgl = dlopen("libGLESv3.so", RTLD_LAZY | RTLD_GLOBAL);
+}
+
+static void close_libgl(void)
+{
+	if (libgl)
+		dlclose(libgl);
+}
+
+static GL3WglProc get_proc(const char *proc)
+{
+	GL3WglProc res;
+
+	res = (GL3WglProc) eglGetProcAddress(proc);
+	if (!res && libgl)
+		res = (GL3WglProc) dlsym(libgl, proc);
+	return res;
+}
 #else
 #include <dlfcn.h>
 #include <GL/glx.h>
