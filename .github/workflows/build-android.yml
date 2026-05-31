@@ -36,7 +36,6 @@ jobs:
           sdkmanager "platforms;android-34" \
                      "build-tools;34.0.0" \
                      "ndk;25.2.9519653" \
-                     "cmake;3.22.1" \
                      "cmdline-tools;latest"
 
       - name: Install CMake and Ninja
@@ -46,29 +45,39 @@ jobs:
 
       - name: Show ANDROID_HOME and SDK path
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           SDK_PATH="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
           echo "sdk.dir=$SDK_PATH" > local.properties
           echo "ANDROID_HOME=$SDK_PATH" >> $GITHUB_ENV
           cat local.properties
 
-      - name: Make gradlew executable
-        run: chmod +x ./gradlew
-
-      - name: Check Gradle wrapper
+      - name: Check system Gradle version
         run: |
-          ./gradlew --version --no-daemon 2>&1 | tee /tmp/gradle_version.log
-          echo "--- Gradle wrapper check done ---"
+          echo "Using system Gradle:"
+          gradle --version 2>&1 | head -5
 
-      - name: Build APK with Gradle wrapper
+      - name: Build APK with system Gradle
         run: |
           echo "Android SDK: $ANDROID_HOME"
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_build.log
+          gradle assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle_build.log
           GRADLE_EXIT=${PIPESTATUS[0]}
           echo "Exit code: $GRADLE_EXIT"
+          if [ $GRADLE_EXIT -ne 0 ]; then
+            echo "=== Build failed. Errors from log: ==="
+            grep -E "(ERROR|error:|FAILED|Error:|BUILD FAILED|What went wrong)" /tmp/gradle_build.log | head -30
+          fi
           exit $GRADLE_EXIT
         timeout-minutes: 30
+
+      - name: Print build log tail (always)
+        if: always()
+        run: |
+          if [ -f /tmp/gradle_build.log ]; then
+            echo "=== Last 100 lines of build log ==="
+            tail -100 /tmp/gradle_build.log
+            echo "=== End of build log ==="
+          else
+            echo "Build log not found"
+          fi
 
       - name: Upload Gradle build log (always)
         if: always()
