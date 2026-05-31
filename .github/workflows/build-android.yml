@@ -53,10 +53,21 @@ jobs:
           fi
           gradle --version
 
+      - name: Show ANDROID_HOME and SDK path
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          echo "ANDROID_NDK_HOME=$ANDROID_NDK_HOME"
+          ls -la "$ANDROID_HOME/platforms/" 2>/dev/null || echo "No platforms dir"
+          ls -la "$ANDROID_HOME/ndk/" 2>/dev/null || echo "No ndk dir"
+
       - name: Build APK with Gradle
         run: |
-          export ANDROID_HOME=$ANDROID_SDK_ROOT
+          export ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}
+          export ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-$ANDROID_HOME}
+          echo "Using ANDROID_HOME=$ANDROID_HOME"
           gradle assembleDebug --no-daemon --stacktrace
+        timeout-minutes: 15
 
       - name: Wait for 3 minutes before verification
         run: sleep 180
