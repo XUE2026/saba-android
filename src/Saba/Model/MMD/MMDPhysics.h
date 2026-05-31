@@ -36,6 +36,39 @@ namespace saba
 
 	class MMDMotionState;
 
+#ifdef SABA_ANDROID
+	class MMDRigidBody
+	{
+	public:
+		MMDRigidBody() = default;
+		~MMDRigidBody() = default;
+		bool Create(const PMDRigidBodyExt&, MMDModel*, MMDNode*) { return true; }
+		bool Create(const PMXRigidbody&, MMDModel*, MMDNode*) { return true; }
+		void Destroy() {}
+		void SetActivation(bool) {}
+		void ResetTransform() {}
+		void Reset(class MMDPhysics*) {}
+		void ReflectGlobalTransform() {}
+		void CalcLocalTransform() {}
+		glm::mat4 GetTransform() { return glm::mat4(1.0f); }
+		btRigidBody* GetRigidBody() const { return nullptr; }
+		uint16_t GetGroup() const { return 0; }
+		uint16_t GetGroupMask() const { return 0; }
+		bool CreateJoint(const PMXJoint&, MMDRigidBody*, MMDRigidBody*) { return true; }
+		bool CreateJoint(const PMDJointExt&, MMDRigidBody*, MMDRigidBody*) { return true; }
+	private:
+		enum class RigidBodyType { Kinematic, Dynamic, Aligned };
+		RigidBodyType m_rigidBodyType = RigidBodyType::Kinematic;
+	};
+
+	class MMDJoint {
+	public:
+		MMDJoint() = default;
+		~MMDJoint() = default;
+		bool CreateJoint(const PMXJoint&, MMDRigidBody*, MMDRigidBody*) { return true; }
+		bool CreateJoint(const PMDJointExt&, MMDRigidBody*, MMDRigidBody*) { return true; }
+	};
+#else
 	class MMDRigidBody
 	{
 	public:
@@ -142,6 +175,8 @@ namespace saba
 		double	m_fps;
 		int		m_maxSubStepCount;
 	};
+
+#endif
 
 }
 #endif // SABA_MODEL_MMDMODEL_MMDPHYSICS_H_

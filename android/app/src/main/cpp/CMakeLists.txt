@@ -54,7 +54,6 @@ set(SABA_MODEL_SOURCES
     ${SABA_SOURCE_DIR}/Saba/Model/MMD/MMDModel.cpp
     ${SABA_SOURCE_DIR}/Saba/Model/MMD/MMDMorph.cpp
     ${SABA_SOURCE_DIR}/Saba/Model/MMD/MMDNode.cpp
-    ${SABA_SOURCE_DIR}/Saba/Model/MMD/MMDPhysics.cpp
     ${SABA_SOURCE_DIR}/Saba/Model/MMD/PMDFile.cpp
     ${SABA_SOURCE_DIR}/Saba/Model/MMD/PMDModel.cpp
     ${SABA_SOURCE_DIR}/Saba/Model/MMD/PMXFile.cpp
