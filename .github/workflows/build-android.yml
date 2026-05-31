@@ -62,7 +62,19 @@ jobs:
       - name: Build with Gradle
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
+          echo "=== Java Version ==="
+          java -version 2>&1
+          echo "=== Android SDK ==="
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls -la $ANDROID_HOME/platforms/ 2>/dev/null || echo "No platforms dir"
+          ls -la $ANDROID_HOME/build-tools/ 2>/dev/null || echo "No build-tools dir"
+          echo "=== NDK ==="
+          ls $ANDROID_HOME/ndk/ 2>/dev/null || echo "No NDK"
+          echo "=== Gradle Wrapper ==="
+          ls -la gradle/wrapper/
+          cat gradle/wrapper/gradle-wrapper.properties
+          echo "=== Running build ==="
+          ./gradlew assembleDebug --stacktrace --info 2>&1
 
       - name: Build Release APK (if signing configured)
         if: ${{ env.KEYSTORE_PASSWORD != '' }}
