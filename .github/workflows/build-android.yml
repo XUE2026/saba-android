@@ -72,9 +72,11 @@ jobs:
 
       - name: Build APK with Gradle
         run: |
-          export ANDROID_HOME=${ANDROID_HOME:-$ANDROID_SDK_ROOT}
-          cat local.properties
-          gradle assembleDebug --no-daemon --stacktrace
+          echo "=== Starting build ==="
+          echo "Gradle version:"
+          gradle --version 2>&1 | head -5
+          echo "=== Running assembleDebug ==="
+          gradle assembleDebug --no-daemon --stacktrace --info 2>&1 | tail -100
         timeout-minutes: 15
 
       - name: Wait for 3 minutes before verification
